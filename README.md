@@ -101,21 +101,11 @@ All admin pages check session role before allowing access
 
 Sensitive scripts (like adding admins) should be removed after use
 
-### Admin Dashboard
-![Admin Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/images/admin-dashboard.png)
-
-### Admin Results
-![Admin Results](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/images/admin-results.png)
-
-### Dashboard
-![Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/images/dashboard.png)
-
-### Login Page
-![Login Page](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/images/loginpage.png)
-
-### Members
-![Members](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/images/members.png)
-📫 Support
+![Admin Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin-dashboard.png)
+![Admin Results](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin-results.png)
+![Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/dashboard.png)
+![Login Page](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/loginpage.png)
+![Members](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/members.png)
 
 If you need help or want to contribute, feel free to open an issue or pull request!
 📄 License MIT
