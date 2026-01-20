@@ -12,15 +12,24 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-100">
 
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 md:hidden"></div>
+
+    <!-- Hamburger Button -->
+    <button id="sidebarToggle"
+        class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
+        ☰
+    </button>
+
     <div class="flex min-h-screen">
 
-        <!-- Sidebar (identical to dashboard) -->
-        <aside class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 hidden md:block">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
 
             <div class="flex flex-col items-center mb-8">
                 <img src="images/jitihada.jpeg" alt="Jitihada Logo"
@@ -33,15 +42,15 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
                     class="block px-4 py-2 hover:bg-white hover:text-blue-900 rounded-lg font-semibold">📊 Dashboard</a>
                 <a href="registration.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📝 Register Member</a>
                 <a href="vote.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">🗳 Vote</a>
-                <a href="members.php" class="block px-4 py-2 bg-white text-blue-900 rounded-lg font-semibold">👥
-                    Members</a>
+                <a href="members.php"
+                    class="block px-4 py-2 bg-white text-blue-900 rounded-lg font-semibold">👥 Members</a>
                 <a href="results.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📈 Results</a>
                 <a href="api/export_csv.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">⬇ Export CSV</a>
             </nav>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6 md:p-8">
+        <main class="flex-1 p-6 md:p-8 md:ml-64">
 
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Members List</h1>
@@ -90,17 +99,42 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
     </div>
 
     <script>
-    // Live Search
-    const searchInput = document.getElementById('search');
-    const tableRows = document.querySelectorAll('#members-table tr');
+        // Live Search
+        const searchInput = document.getElementById('search');
+        const tableRows = document.querySelectorAll('#members-table tr');
 
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.toLowerCase();
-        tableRows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            tableRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
         });
-    });
+
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        sidebarToggle.addEventListener('click', openSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar on mobile link click
+        document.querySelectorAll('#sidebar nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) closeSidebar();
+            });
+        });
     </script>
 
 </body>

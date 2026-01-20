@@ -29,20 +29,27 @@ $pending = $total - $voted;
     <meta charset="UTF-8">
     <title>Voting Results | JITIHADA GROUP</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-gray-100">
 
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 md:hidden"></div>
+
+    <!-- Hamburger Button -->
+    <button id="sidebarToggle" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
+        ☰
+    </button>
+
     <div class="flex min-h-screen">
 
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 hidden md:block">
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
             <div class="flex flex-col items-center mb-8">
                 <img src="images/jitihada.jpeg" alt="Jitihada Logo"
                     class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
@@ -63,7 +70,7 @@ $pending = $total - $voted;
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6 md:p-10">
+        <main class="flex-1 p-6 md:p-10 md:ml-64">
 
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
@@ -115,19 +122,19 @@ $pending = $total - $voted;
                     </thead>
                     <tbody>
                         <?php foreach ($members as $index => $m): ?>
-                            <tr>
-                                <td><?= $index + 1 ?></td>
-                                <td><?= htmlspecialchars($m['full_name']) ?></td>
-                                <td><?= htmlspecialchars($m['reg_no']) ?></td>
-                                <td><?= htmlspecialchars($m['assigned_number'] ?? '—') ?></td>
-                                <td>
-                                    <?php if ((int)$m['has_voted'] === 1): ?>
-                                        <span class="badge bg-success">Voted</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-danger">Pending</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td><?= $index + 1 ?></td>
+                            <td><?= htmlspecialchars($m['full_name']) ?></td>
+                            <td><?= htmlspecialchars($m['reg_no']) ?></td>
+                            <td><?= htmlspecialchars($m['assigned_number'] ?? '—') ?></td>
+                            <td>
+                                <?php if ((int)$m['has_voted'] === 1): ?>
+                                <span class="badge bg-success">Voted</span>
+                                <?php else: ?>
+                                <span class="badge bg-danger">Pending</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -141,6 +148,32 @@ $pending = $total - $voted;
 
         </main>
     </div>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.querySelectorAll('#sidebar nav a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) closeSidebar();
+        });
+    });
+    </script>
 
 </body>
 

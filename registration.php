@@ -13,27 +13,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!preg_match("/^\+?\d{6,15}$/", $phone)) {
         $message = "Phone number is invalid";
     } else {
-        // Prevent duplicate ID
-        $stmt = $pdo->prepare("SELECT * FROM members WHERE id_no=? OR phone=?");
-        $stmt->execute([$id_no, $phone]);
-        if ($stmt->rowCount()) {
-            $message = "Member with this ID or phone already exists!";
-        } else {
-            // Check if full 10 slots are filled
-            $count = $pdo->query("SELECT COUNT(*) FROM members")->fetchColumn();
-            if ($count >= 10) {
-                $message = "Registration full. Only 10 members allowed.";
+        try {
+            // Prevent duplicate ID or phone
+            $stmt = $pdo->prepare("SELECT * FROM members WHERE id_no=? OR phone=?");
+            $stmt->execute([$id_no, $phone]);
+
+            if ($stmt->rowCount()) {
+                $message = "Member with this ID or phone already exists!";
             } else {
-                $reg_no = "JG" . str_pad($count + 1, 4, "0", STR_PAD_LEFT);
-                $assigned_number = $count + 1;
+                // Get next available assigned_number
+                $stmt = $pdo->query("SELECT MAX(assigned_number) AS max_num FROM members");
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $assigned_number = ($row['max_num'] ?? 0) + 1;
 
-                $stmt = $pdo->prepare("INSERT INTO members(reg_no,full_name,phone,id_no,assigned_number) VALUES(?,?,?,?,?)");
-                $stmt->execute([$reg_no, $name, $phone, $id_no, $assigned_number]);
+                // Check max 10 slots
+                if ($assigned_number > 10) {
+                    $message = "Registration full. Only 10 members allowed.";
+                } else {
+                    $reg_no = "JG" . str_pad($assigned_number, 4, "0", STR_PAD_LEFT);
 
-                $message = "<span class='text-green-700 font-bold'>✅ Registered successfully!</span><br>
-                            REG.NO: <strong>$reg_no</strong><br>
-                            Merry Go Round Number: <strong>$assigned_number</strong>";
+                    $insert = $pdo->prepare("INSERT INTO members(reg_no,full_name,phone,id_no,assigned_number) VALUES(?,?,?,?,?)");
+                    $insert->execute([$reg_no, $name, $phone, $id_no, $assigned_number]);
+
+                    $message = "<span class='text-green-700 font-bold'>✅ Registered successfully!</span><br>
+                                REG.NO: <strong>$reg_no</strong><br>
+                                Merry Go Round Number: <strong>$assigned_number</strong>";
+                }
             }
+        } catch (PDOException $e) {
+            $message = "<span class='text-red-700 font-bold'>Error: " . $e->getMessage() . "</span>";
         }
     }
 }
@@ -47,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Register Member | JITIHADA GROUP</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -78,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="flex min-h-screen">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 hidden md:block">
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
         <div class="flex flex-col items-center mb-8">
             <img src="images/jitihada.jpeg" alt="Jitihada Logo"
                 class="w-24 h-24 rounded-full border-4 border-white shadow-lg">
@@ -97,9 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </nav>
     </aside>
 
+    <!-- Overlay for mobile -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 md:hidden"></div>
+
+    <!-- Hamburger Button -->
+    <button id="sidebarToggle" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
+        ☰
+    </button>
+
     <!-- Main -->
     <main class="flex-1 flex justify-center items-center p-6 md:p-8">
-
         <div class="card bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
             <h2 class="text-2xl font-bold mb-4 text-center text-blue-900">📝 Member Registration</h2>
 
@@ -123,9 +139,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="dashboard.php" class="mt-4 block text-center text-blue-700 hover:underline font-semibold">← Back to
                 Dashboard</a>
         </div>
-
     </main>
 
+    <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar on mobile link click
+    document.querySelectorAll('#sidebar nav a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) closeSidebar();
+        });
+    });
+    </script>
 </body>
 
 </html>
