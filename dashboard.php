@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>JITIHADA GROUP | Voting Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +16,31 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+    /* Sidebar sliding styles */
+    #sidebar {
+        transition: transform 0.3s ease;
+        /* Slide off screen initially on mobile */
+        transform: translateX(-100%);
+        overflow-y: auto;
+        /* Enable scrolling if content is tall */
+    }
+
+    /* Show sidebar on md+ screens */
+    @media (min-width: 768px) {
+        #sidebar {
+            transform: translateX(0) !important;
+            position: relative !important;
+        }
+    }
+
+    /* When active class is toggled, slide sidebar in */
+    #sidebar.active {
+        transform: translateX(0);
+        position: fixed !important;
+    }
+    </style>
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -24,11 +49,11 @@
 
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 hidden md:block fixed md:relative h-full z-50">
+            class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 fixed md:relative h-full z-50">
             <!-- Logo -->
             <div class="flex flex-col items-center mb-8">
                 <img src="images/jitihada.jpeg" alt="Jitihada Logo"
-                    class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
+                    class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg" />
                 <h2 class="mt-3 font-bold text-lg tracking-wide">JITIHADA GROUP</h2>
             </div>
 
@@ -154,10 +179,9 @@
             <!-- Footer -->
             <footer class="text-center text-xs text-gray-500 dark:text-gray-400 mt-10">
                 © <?php echo date("Y"); ?> JITIHADA GROUP Voting System
-                <br>
+                <br />
                 Powered by <span class="font-semibold">Dantechdevs developers</span>
             </footer>
-
         </main>
     </div>
 
@@ -280,7 +304,7 @@
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     function toggleSidebar() {
-        sidebar.classList.toggle('hidden');
+        sidebar.classList.toggle('active'); // Use active class for sliding
         sidebarOverlay.classList.toggle('hidden');
     }
 
@@ -297,9 +321,6 @@
     loadStats();
     loadRecentVotes();
     </script>
-
 </body>
 
 </html>
-
-//updated
