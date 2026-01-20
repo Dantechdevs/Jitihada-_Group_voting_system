@@ -101,24 +101,22 @@ All admin pages check session role before allowing access
 
 Sensitive scripts (like adding admins) should be removed after use
 
-🧪 Screenshots
-dashboard
-<img width="955" height="467" alt="Image" src="https://github.com/user-attachments/assets/56f2a7e2-436f-4c41-aa9c-da5899b919be" />
+## 🧪 Screenshots
 
-Member registration
-<img width="958" height="469" alt="Image" src="https://github.com/user-attachments/assets/e9e38afb-0af5-4f42-96e0-67788adcf258" />
+### Admin Dashboard
+![Admin Dashboard](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/admin-dashboard.png)
 
-Vote
-<img width="960" height="484" alt="Image" src="https://github.com/user-attachments/assets/d1bc6648-3f79-416c-ade9-15f543938826" />
+### Admin Results
+![Admin Results](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/admin-results.png)
 
-Members
-<img width="960" height="470" alt="Image" src="https://github.com/user-attachments/assets/a8dbe10c-9753-4cca-8fdf-73ec94750925" />
+### Dashboard
+![Dashboard](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/dashboard.png)
 
-Login to view results
-<img width="959" height="473" alt="Image" src="https://github.com/user-attachments/assets/c2a5253f-b978-44b1-9a9b-d9edd62fe1c2" />
+### Login Page
+![Login Page](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/loginpage.png)
 
-Results
-<img width="957" height="479" alt="Image" src="https://github.com/user-attachments/assets/2dfa2b73-6396-475a-8123-78ebded54624" />
+### Members
+![Members](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/members.png)
 
 
 Add screenshots here if available (recommended to boost repo clarity).
