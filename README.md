@@ -118,9 +118,6 @@ Sensitive scripts (like adding admins) should be removed after use
 ### Members
 ![Members](https://raw.githubusercontent.com/USERNAME/REPO/main/screenshots/members.png)
 
-
-Add screenshots here if available (recommended to boost repo clarity).
-
 📫 Support
 
 If you need help or want to contribute, feel free to open an issue or pull request!
