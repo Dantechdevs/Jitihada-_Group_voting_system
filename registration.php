@@ -3,41 +3,39 @@ require_once "config/db.php";
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
+    $name  = trim($_POST['name']);
     $phone = trim($_POST['phone']);
-    $id_no = trim($_POST['id_no']);
 
-    // Validate ID and phone
-    if (!preg_match("/^\d{8}$/", $id_no)) {
-        $message = "ID.NO must be 8 digits";
-    } elseif (!preg_match("/^\+?\d{6,15}$/", $phone)) {
+    // Validate name and phone
+    if (empty($name)) {
+        $message = "Name is required";
+    } elseif (!preg_match("/^\+?\d{10,15}$/", $phone)) {
         $message = "Phone number is invalid";
     } else {
         try {
-            // Prevent duplicate ID or phone
-            $stmt = $pdo->prepare("SELECT * FROM members WHERE id_no=? OR phone=?");
-            $stmt->execute([$id_no, $phone]);
+            // Prevent duplicate phone
+            $stmt = $pdo->prepare("SELECT * FROM members WHERE phone = ?");
+            $stmt->execute([$phone]);
 
             if ($stmt->rowCount()) {
-                $message = "Member with this ID or phone already exists!";
+                $message = "Member with this phone already exists!";
             } else {
-                // Get next available assigned_number
-                $stmt = $pdo->query("SELECT MAX(assigned_number) AS max_num FROM members");
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                $assigned_number = ($row['max_num'] ?? 0) + 1;
+                // Check total registered members
+                $stmt = $pdo->query("SELECT COUNT(*) AS total FROM members");
+                $total = (int)$stmt->fetchColumn();
 
-                // Check max 10 slots
-                if ($assigned_number > 10) {
+                if ($total >= 10) {
                     $message = "Registration full. Only 10 members allowed.";
                 } else {
-                    $reg_no = "JG" . str_pad($assigned_number, 4, "0", STR_PAD_LEFT);
+                    // Generate reg_no automatically (JG0001, JG0002...)
+                    $reg_no = "JG" . str_pad($total + 1, 4, "0", STR_PAD_LEFT);
 
-                    $insert = $pdo->prepare("INSERT INTO members(reg_no,full_name,phone,id_no,assigned_number) VALUES(?,?,?,?,?)");
-                    $insert->execute([$reg_no, $name, $phone, $id_no, $assigned_number]);
+                    $insert = $pdo->prepare("INSERT INTO members (reg_no, name, phone, voted, assigned_number) VALUES (?, ?, ?, 0, NULL)");
+                    $insert->execute([$reg_no, $name, $phone]);
 
                     $message = "<span class='text-green-700 font-bold'>✅ Registered successfully!</span><br>
                                 REG.NO: <strong>$reg_no</strong><br>
-                                Merry Go Round Number: <strong>$assigned_number</strong>";
+                                Note: Voting numbers (1-10) will be assigned later.";
                 }
             }
         } catch (PDOException $e) {
@@ -126,9 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST" class="space-y-4">
                 <input type="text" name="name" placeholder="Full Name" required
                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="phone" placeholder="Phone Number" required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="id_no" placeholder="ID.NO (8 digits)" required
+                <input type="text" name="phone" placeholder="Phone Number (e.g. +2547XXXXXXXX)" required
                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">

@@ -7,7 +7,7 @@ $alertType = "";
 /* =========================
    CHECK REMAINING VOTING SLOTS
 ========================= */
-$stmt = $pdo->query("SELECT COUNT(*) FROM members WHERE has_voted = 1");
+$stmt = $pdo->query("SELECT COUNT(*) FROM members WHERE voted = 1");
 $usedSlots = (int)$stmt->fetchColumn();
 $remainingSlots = max(0, 10 - $usedSlots);
 $votingClosed = ($remainingSlots <= 0);
@@ -16,33 +16,36 @@ $votingClosed = ($remainingSlots <= 0);
    HANDLE VOTING
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
-    $reg = strtoupper(trim($_POST['reg_no']));
+    $reg_no = strtoupper(trim($_POST['reg_no']));
 
-    $stmt = $pdo->prepare("SELECT id, has_voted, assigned_number FROM members WHERE reg_no = ?");
-    $stmt->execute([$reg]);
+    $stmt = $pdo->prepare("SELECT id, name, voted, assigned_number FROM members WHERE reg_no = ?");
+    $stmt->execute([$reg_no]);
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$member) {
         $message = "❌ You must be registered to vote.";
         $alertType = "danger";
-    } elseif ($member['has_voted']) {
+    } elseif ($member['voted']) {
         $message = "⚠ You already voted. Your number was: {$member['assigned_number']}";
         $alertType = "warning";
     } else {
         try {
             $pdo->beginTransaction();
 
-            $usedNumbers = $pdo->query("SELECT assigned_number FROM members WHERE assigned_number IS NOT NULL FOR UPDATE")
-                               ->fetchAll(PDO::FETCH_COLUMN);
+            // Lock used numbers to prevent duplicates
+            $stmt = $pdo->query("SELECT assigned_number FROM members WHERE assigned_number IS NOT NULL FOR UPDATE");
+            $usedNumbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             $allowed = range(1, 10);
             $available = array_values(array_diff($allowed, $usedNumbers));
 
-            if (empty($available)) throw new Exception("No numbers left");
+            if (empty($available)) {
+                throw new Exception("No numbers left");
+            }
 
             $assigned_number = $available[array_rand($available)];
 
-            $stmt = $pdo->prepare("UPDATE members SET assigned_number = ?, has_voted = 1 WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE members SET assigned_number = ?, voted = 1 WHERE id = ?");
             $stmt->execute([$assigned_number, $member['id']]);
 
             $pdo->commit();
@@ -50,14 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
             $message = "🎉 Vote successful! Your lucky number is: $assigned_number";
             $alertType = "success";
 
-            $remainingSlots--;
-            if ($remainingSlots <= 0) $votingClosed = true;
         } catch (Exception $e) {
             $pdo->rollBack();
             $message = "🚫 Voting Closed — All 10 slots are filled.";
             $alertType = "danger";
-            $votingClosed = true;
         }
+
+        // Recalculate remaining slots after voting
+        $stmt = $pdo->query("SELECT COUNT(*) FROM members WHERE voted = 1");
+        $usedSlots = (int)$stmt->fetchColumn();
+        $remainingSlots = max(0, 10 - $usedSlots);
+        $votingClosed = ($remainingSlots <= 0);
     }
 }
 ?>
@@ -72,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
     <style>
         @keyframes fade { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
         .fade-in { animation: fade .5s ease-in-out; }
-
         .marquee { overflow:hidden; white-space:nowrap; }
         .marquee span { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
         @keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-100%); } }
@@ -122,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
             <!-- CARD -->
             <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md fade-in text-center">
                 <h1 class="text-2xl font-bold mb-1">🗳 Voting</h1>
-                <p class="text-gray-500 mb-3">Ensure you are registered before voting</p>
+                <p class="text-gray-500 mb-3">Enter your REG.NO to get your lucky number (1–10)</p>
 
                 <span class="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm mb-4">
                     ● System Active

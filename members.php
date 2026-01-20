@@ -20,8 +20,7 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
     <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 md:hidden"></div>
 
     <!-- Hamburger Button -->
-    <button id="sidebarToggle"
-        class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
+    <button id="sidebarToggle" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
         ☰
     </button>
 
@@ -42,8 +41,8 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
                     class="block px-4 py-2 hover:bg-white hover:text-blue-900 rounded-lg font-semibold">📊 Dashboard</a>
                 <a href="registration.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📝 Register Member</a>
                 <a href="vote.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">🗳 Vote</a>
-                <a href="members.php"
-                    class="block px-4 py-2 bg-white text-blue-900 rounded-lg font-semibold">👥 Members</a>
+                <a href="members.php" class="block px-4 py-2 bg-white text-blue-900 rounded-lg font-semibold">👥
+                    Members</a>
                 <a href="results.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📈 Results</a>
                 <a href="api/export_csv.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">⬇ Export CSV</a>
             </nav>
@@ -71,19 +70,17 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
                             <th class="p-3 text-left">REG.NO</th>
                             <th class="p-3 text-left">Full Name</th>
                             <th class="p-3 text-left">Phone</th>
-                            <th class="p-3 text-left">Assigned Number</th>
-                            <th class="p-3 text-left">Status</th>
+                            <th class="p-3 text-left">Vote</th>
                         </tr>
                     </thead>
                     <tbody id="members-table">
                         <?php foreach ($data as $m): ?>
                         <tr class="border-b hover:bg-gray-50">
                             <td class="p-3"><?= $m['reg_no'] ?></td>
-                            <td class="p-3"><?= $m['full_name'] ?></td>
+                            <td class="p-3"><?= $m['name'] ?></td>
                             <td class="p-3"><?= $m['phone'] ?></td>
-                            <td class="p-3"><?= $m['assigned_number'] ?></td>
                             <td class="p-3">
-                                <?php if ($m['has_voted']): ?>
+                                <?php if ($m['voted'] == 1): ?>
                                 <span class="px-2 py-1 rounded-full text-white bg-green-500">Voted</span>
                                 <?php else: ?>
                                 <span class="px-2 py-1 rounded-full text-white bg-red-500">Pending</span>
@@ -99,42 +96,42 @@ $data = $pdo->query("SELECT * FROM members ORDER BY assigned_number ASC")->fetch
     </div>
 
     <script>
-        // Live Search
-        const searchInput = document.getElementById('search');
-        const tableRows = document.querySelectorAll('#members-table tr');
+    // Live Search
+    const searchInput = document.getElementById('search');
+    const tableRows = document.querySelectorAll('#members-table tr');
 
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase();
-            tableRows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        tableRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
         });
+    });
 
-        // Sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const sidebarToggle = document.getElementById('sidebarToggle');
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
 
-        function openSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            sidebarOverlay.classList.remove('hidden');
-        }
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
 
-        function closeSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        }
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
 
-        sidebarToggle.addEventListener('click', openSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
 
-        // Close sidebar on mobile link click
-        document.querySelectorAll('#sidebar nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 768) closeSidebar();
-            });
+    // Close sidebar on mobile link click
+    document.querySelectorAll('#sidebar nav a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) closeSidebar();
         });
+    });
     </script>
 
 </body>
