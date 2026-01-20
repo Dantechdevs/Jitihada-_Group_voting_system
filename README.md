@@ -1,60 +1,88 @@
-🗳️ Jitihada Group Voting System
+# 🗳️ Jitihada Group Voting System
 
-A secure, web-based voting system built with PHP, Tailwind CSS, and Bootstrap for managing members, collecting votes, and tracking results. Designed for contribution groups, organizations, and small elections.
+![Project Banner](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/dashboard.png)
 
-⚡ Badges
+A **secure, web-based voting system** built with **PHP**, **Tailwind CSS**, and **Bootstrap** for managing members, collecting votes, and tracking results. Ideal for contribution groups, small organizations, or community elections.
 
+---
 
+## 📌 Table of Contents
 
+1. [Badges](#-badges)  
+2. [Features](#-features)  
+3. [Screenshots](#-screenshots)  
+4. [How It Works](#-how-it-works)  
+5. [Installation & Setup](#-installation--setup)  
+6. [Security](#-security)  
+7. [Contributing](#-contributing)  
+8. [License](#-license)  
 
+---
 
+## ⚡ Badges
 
+![PHP](https://img.shields.io/badge/PHP-8.0+-blue?logo=php&style=flat-square)  
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue?logo=mysql&style=flat-square)  
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap&style=flat-square)  
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.0+-38B2AC?style=flat-square)  
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)  
+![Last Commit](https://img.shields.io/github/last-commit/Dantechdevs/Jitihada-_Group_voting_system?style=flat-square)  
 
+---
 
+## 🌟 Features
 
+| Feature | Badge |
+|---------|-------|
+| Secure Admin Login | 🔐 |
+| Member Registration & Voting | 👤 |
+| Real-time Voting Stats | 📊 |
+| Admin-only Results Access | 🚫 |
+| Export CSV | ⬇ |
+| Session Protection | 🛡 |
+| Responsive UI | 📱 |
 
+---
 
+## 📸 Screenshots
 
-🌟 Features
+### Admin Dashboard  
+![Admin Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin%20dashboard.png)
 
-🔐 Secure admin login with password hashing
+### Admin Results  
+![Admin Results](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin%20results.png)
 
-👤 Member registration & voting page
+### Dashboard  
+![Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/dashboard.png)
 
-📊 Real-time voting statistics
+### Login Page  
+![Login Page](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/loginpage.png)
 
-🚫 Admin-only access to results and exports
+### Members  
+![Members](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/members.png)
 
-⬇ Export voting data to CSV
+---
 
-🛡 Session protection for all sensitive pages
+## 🧩 How It Works
 
-📱 Fully responsive UI (mobile & desktop friendly)
-
-📸 Screenshots
-Admin Dashboard
-
-Admin Results
-
-Dashboard
-
-Login Page
-
-Members
-
-🚀 Live Demo (Local Setup)
-
-You can run the project locally using XAMPP/WAMP/LAMP:
-
+```mermaid
+flowchart TD
+    A[Admin Login] --> B{Authenticated?}
+    B -- Yes --> C[Admin Dashboard]
+    B -- No --> D[Error / Redirect]
+    C --> E[View Voting Stats]
+    C --> F[Export CSV]
+    C --> G[Manage Members]
+    G --> H[Add/Edit Members]
+    H --> I[Members Vote]
+    I --> E
+🚀 Installation & Setup
 1. Clone the repository
 git clone https://github.com/Dantechdevs/Jitihada-_Group_voting_system.git
 cd Jitihada-_Group_voting_system
-
 2. Create the database
 
-Create a MySQL database, for example: jitihada_db
-
-Run the following SQL commands:
+Create a MySQL database named jitihada_db and run:
 
 CREATE TABLE admins (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -71,7 +99,7 @@ CREATE TABLE members (
     has_voted TINYINT(1) DEFAULT 0
 );
 
-3. Configure the database connection
+3. Configure database connection
 
 Edit config/db.php:
 
@@ -101,27 +129,17 @@ Delete this file after use for security.
 
 Admin login: admin_login.php
 
-Members can vote via the member page
+Members vote via the member page
 
 Export results as CSV from the admin panel
-
-🛠 Installation Notes
-
-PHP ≥ 8.0
-
-MySQL or MariaDB
-
-Apache (XAMPP/WAMP/LAMP)
-
-curl extension enabled in PHP
 
 🔐 Security
 
 Passwords hashed using password_hash()
 
-Sessions validated before accessing admin pages
+Session validation on all admin pages
 
-Sensitive setup scripts should be deleted after use
+Sensitive scripts should be removed after setup
 
 🤝 Contributing
 
@@ -135,7 +153,7 @@ Improve UI/UX
 
 Update documentation
 
-Open an issue if you need help or want to suggest improvements.
+Open an issue for help or suggestions.
 
 📄 License
 
