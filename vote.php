@@ -7,27 +7,19 @@ $alertType = "";
 /* =========================
    CHECK REMAINING VOTING SLOTS
 ========================= */
-$stmt = $pdo->query("
-    SELECT COUNT(*) 
-    FROM members 
-    WHERE has_voted = 1
-");
+$stmt = $pdo->query("SELECT COUNT(*) FROM members WHERE has_voted = 1");
 $usedSlots = (int)$stmt->fetchColumn();
 $remainingSlots = max(0, 10 - $usedSlots);
 $votingClosed = ($remainingSlots <= 0);
+
 /* =========================
    HANDLE VOTING
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
-
     $reg = strtoupper(trim($_POST['reg_no']));
 
     // Verify registration
-    $stmt = $pdo->prepare("
-        SELECT id, has_voted, assigned_number
-        FROM members
-        WHERE reg_no = ?
-    ");
+    $stmt = $pdo->prepare("SELECT id, has_voted, assigned_number FROM members WHERE reg_no = ?");
     $stmt->execute([$reg]);
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -41,29 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
         try {
             $pdo->beginTransaction();
 
-            // Lock rows
-            $usedNumbers = $pdo->query("
-                SELECT assigned_number
-                FROM members
-                WHERE assigned_number IS NOT NULL
-                FOR UPDATE
-            ")->fetchAll(PDO::FETCH_COLUMN);
+            // Lock rows and get used numbers
+            $usedNumbers = $pdo->query("SELECT assigned_number FROM members WHERE assigned_number IS NOT NULL FOR UPDATE")->fetchAll(PDO::FETCH_COLUMN);
 
             $allowed = range(1, 10);
             $available = array_values(array_diff($allowed, $usedNumbers));
 
             if (empty($available)) {
-                throw new Exception("Voting closed");
+                throw new Exception("No numbers left");
             }
 
-            // 🎲 LUCK-BASED ASSIGNMENT
+            // Assign a random number
             $assigned_number = $available[array_rand($available)];
 
-            $stmt = $pdo->prepare("
-                UPDATE members
-                SET assigned_number = ?, has_voted = 1
-                WHERE id = ?
-            ");
+            $stmt = $pdo->prepare("UPDATE members SET assigned_number = ?, has_voted = 1 WHERE id = ?");
             $stmt->execute([$assigned_number, $member['id']]);
 
             $pdo->commit();
@@ -71,11 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
             $message = "🎉 Vote successful! Your lucky number is: $assigned_number";
             $alertType = "success";
 
-            // Recalculate slots
+            // Update remaining slots
             $remainingSlots--;
+            if ($remainingSlots <= 0) $votingClosed = true;
         } catch (Exception $e) {
             $pdo->rollBack();
-            $message = "🚫 Voting closed. All numbers 1–10 have been taken.";
+            $message = "🚫 Voting Closed — All 10 slots are filled.";
             $alertType = "danger";
             $votingClosed = true;
         }

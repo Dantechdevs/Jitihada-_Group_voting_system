@@ -1,6 +1,13 @@
 <?php
-require_once "config/db.php";
+session_start();
 
+// 🔐 Admin-only access
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: admin_login.php');
+    exit;
+}
+
+require_once "config/db.php";
 
 // Fetch all members
 $stmt = $pdo->query("
@@ -11,8 +18,8 @@ $stmt = $pdo->query("
 $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Stats
-$total = count($members);
-$voted = count(array_filter($members, fn($m) => $m['has_voted']));
+$total   = count($members);
+$voted   = count(array_filter($members, fn($m) => (int)$m['has_voted'] === 1));
 $pending = $total - $voted;
 ?>
 <!DOCTYPE html>
@@ -23,10 +30,9 @@ $pending = $total - $voted;
     <title>Voting Results | JITIHADA GROUP</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -42,6 +48,7 @@ $pending = $total - $voted;
                     class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
                 <h2 class="mt-3 font-bold text-lg tracking-wide">JITIHADA GROUP</h2>
             </div>
+
             <nav class="space-y-3 text-sm">
                 <a href="dashboard.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📊 Dashboard</a>
                 <a href="registration.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">📝 Register Member</a>
@@ -50,20 +57,30 @@ $pending = $total - $voted;
                 <a href="results.php" class="block px-4 py-2 bg-white text-blue-900 rounded-lg font-semibold">📈
                     Results</a>
                 <a href="api/export_csv.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg">⬇ Export CSV</a>
+                <a href="logout.php" class="block px-4 py-2 hover:bg-blue-700 rounded-lg text-red-500 font-semibold">🚪
+                    Logout</a>
             </nav>
         </aside>
 
-        <!-- Main -->
+        <!-- Main Content -->
         <main class="flex-1 p-6 md:p-10">
 
+            <!-- Header -->
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Voting Results</h1>
-                    <p class="text-gray-500 text-sm">All members and their voting status</p>
+                    <p class="text-gray-500 text-sm">Admin view – member voting status</p>
                 </div>
                 <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-medium shadow">
-                    ● System Active
+                    ● Admin Access
                 </span>
+            </div>
+
+            <!-- Export CSV Button -->
+            <div class="flex justify-end mb-4">
+                <a href="api/export_csv.php" class="btn btn-success text-white px-4 py-2 rounded-lg shadow">
+                    ⬇ Export CSV
+                </a>
             </div>
 
             <!-- Stats -->
@@ -82,9 +99,10 @@ $pending = $total - $voted;
                 </div>
             </div>
 
-            <!-- Voting Table -->
-            <div class="bg-white shadow-lg rounded-2xl p-6 mb-6 overflow-x-auto">
+            <!-- Results Table -->
+            <div class="bg-white shadow-lg rounded-2xl p-6 overflow-x-auto">
                 <h2 class="font-semibold mb-4 text-gray-700">Member Voting Details</h2>
+
                 <table class="table table-striped table-hover w-full">
                     <thead class="table-dark">
                         <tr>
@@ -97,61 +115,32 @@ $pending = $total - $voted;
                     </thead>
                     <tbody>
                         <?php foreach ($members as $index => $m): ?>
-                        <tr>
-                            <td><?= $index + 1 ?></td>
-                            <td><?= htmlspecialchars($m['full_name']) ?></td>
-                            <td><?= $m['reg_no'] ?></td>
-                            <td><?= $m['assigned_number'] ?? '—' ?></td>
-                            <td>
-                                <?php if ($m['has_voted']): ?>
-                                <span class="badge bg-success">Voted</span>
-                                <?php else: ?>
-                                <span class="badge bg-danger">Pending</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td><?= htmlspecialchars($m['full_name']) ?></td>
+                                <td><?= htmlspecialchars($m['reg_no']) ?></td>
+                                <td><?= htmlspecialchars($m['assigned_number'] ?? '—') ?></td>
+                                <td>
+                                    <?php if ((int)$m['has_voted'] === 1): ?>
+                                        <span class="badge bg-success">Voted</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger">Pending</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Chart -->
-            <div class="bg-white shadow-lg rounded-2xl p-6">
-                <h2 class="font-semibold mb-4 text-gray-700">Voting Progress</h2>
-                <canvas id="voteChart"></canvas>
-            </div>
-
             <!-- Footer -->
             <footer class="text-center text-xs text-gray-500 mt-10">
-                © <?= date("Y") ?> JITIHADA GROUP Voting System
-                <br>
+                © <?= date("Y") ?> JITIHADA GROUP Voting System<br>
                 Powered by <span class="font-semibold">Dantechdevs developers</span>
             </footer>
 
         </main>
     </div>
-
-    <script>
-    const ctx = document.getElementById('voteChart').getContext('2d');
-    const voteChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Voted', 'Pending'],
-            datasets: [{
-                data: [<?= $voted ?>, <?= $pending ?>],
-                backgroundColor: ['#22c55e', '#ef4444']
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-    </script>
 
 </body>
 
