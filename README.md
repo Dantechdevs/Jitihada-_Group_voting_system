@@ -1,49 +1,61 @@
-# 🗳️ Jitihada Group Voting System
+🗳️ Jitihada Group Voting System
 
-A web‑based voting system built with **PHP**, **Tailwind CSS**, and **Bootstrap** for managing members and tracking voting results, with secure admin access and CSV export functionality.
+A secure, web-based voting system built with PHP, Tailwind CSS, and Bootstrap for managing members, collecting votes, and tracking results. Designed for contribution groups, organizations, and small elections.
 
-This repository includes:
-✔ Admin login with hashed passwords  
-✔ Member registration & voting page  
-✔ Admin‑only results view  
-✔ Export results to CSV  
-✔ Secure session protection  
+⚡ Badges
 
----
 
-## 📌 Features
 
-- 🚫 Admin‑only access to results and exports  
-- 📊 Voting statistics (total, voted, pending)  
-- 👤 Member management (add/edit/track)  
-- ⬇ Export voting data to CSV  
-- 🔐 Secure login with hashed passwords  
-- 📁 Clean and responsive UI
 
----
 
-## 🚀 Getting Started
 
-### 📦 Requirements
 
-- PHP 8+  
-- MySQL / MariaDB  
-- Apache (e.g., XAMPP, WAMP, LAMP)  
-- Enabled `curl` PHP extension  
 
----
 
-## 🛠️ Installation
 
-1. **Clone the repository**
 
-```bash
+
+🌟 Features
+
+🔐 Secure admin login with password hashing
+
+👤 Member registration & voting page
+
+📊 Real-time voting statistics
+
+🚫 Admin-only access to results and exports
+
+⬇ Export voting data to CSV
+
+🛡 Session protection for all sensitive pages
+
+📱 Fully responsive UI (mobile & desktop friendly)
+
+📸 Screenshots
+Admin Dashboard
+
+Admin Results
+
+Dashboard
+
+Login Page
+
+Members
+
+🚀 Live Demo (Local Setup)
+
+You can run the project locally using XAMPP/WAMP/LAMP:
+
+1. Clone the repository
 git clone https://github.com/Dantechdevs/Jitihada-_Group_voting_system.git
 cd Jitihada-_Group_voting_system
 
-Setup database
+2. Create the database
 
-Create a database (e.g., jitihada_db) then run:
+Create a MySQL database, for example: jitihada_db
+
+Run the following SQL commands:
+
 CREATE TABLE admins (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -59,9 +71,9 @@ CREATE TABLE members (
     has_voted TINYINT(1) DEFAULT 0
 );
 
-Configure database connection
+3. Configure the database connection
 
-Update config/db.php with your DB credentials:
+Edit config/db.php:
 
 $host = "localhost";
 $db   = "jitihada_db";
@@ -74,48 +86,57 @@ $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ];
+
 $pdo = new PDO($dsn, $user, $pass, $options);
 
+4. Create an admin account
 
-Create an admin user
+Create api/add_admin.php with your desired username & password.
 
-Create api/add_admin.php, set your desired username & password, then load it once in the browser to insert the admin account. Delete it afterward for security.
+Load it once in the browser to insert the admin account.
 
-👤 Admin Login
+Delete this file after use for security.
 
-Navigate to admin_login.php
+5. Access the system
 
-Log in using the admin credentials you created
+Admin login: admin_login.php
 
-You will be redirected to the results page
+Members can vote via the member page
 
-📄 Export Data
+Export results as CSV from the admin panel
 
-From the results page, admins can export voting data to CSV using the Export CSV button.
+🛠 Installation Notes
+
+PHP ≥ 8.0
+
+MySQL or MariaDB
+
+Apache (XAMPP/WAMP/LAMP)
+
+curl extension enabled in PHP
 
 🔐 Security
 
-Passwords are hashed using password_hash()
+Passwords hashed using password_hash()
 
-All admin pages check session role before allowing access
+Sessions validated before accessing admin pages
 
-Sensitive scripts (like adding admins) should be removed after use
+Sensitive setup scripts should be deleted after use
 
-### Admin Dashboard
-![Admin Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin-dashboard.png)
+🤝 Contributing
 
-### Admin Results
-![Admin Results](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/admin-results.png)
+Pull requests are welcome!
 
-### Dashboard
-![Dashboard](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/dashboard.png)
+Add features
 
-### Login Page
-![Login Page](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/loginpage.png)
+Fix bugs
 
-### Members
-![Members](https://raw.githubusercontent.com/Dantechdevs/Jitihada-_Group_voting_system/main/screenshots/members.png)
+Improve UI/UX
 
+Update documentation
 
-If you need help or want to contribute, feel free to open an issue or pull request!
-📄 License MIT
+Open an issue if you need help or want to suggest improvements.
+
+📄 License
+
+This project is licensed under the MIT License.
