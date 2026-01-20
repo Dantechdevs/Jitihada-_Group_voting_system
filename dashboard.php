@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>JITIHADA GROUP | Voting Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,31 +16,6 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-    /* Sidebar sliding styles */
-    #sidebar {
-        transition: transform 0.3s ease;
-        /* Slide off screen initially on mobile */
-        transform: translateX(-100%);
-        overflow-y: auto;
-        /* Enable scrolling if content is tall */
-    }
-
-    /* Show sidebar on md+ screens */
-    @media (min-width: 768px) {
-        #sidebar {
-            transform: translateX(0) !important;
-            position: relative !important;
-        }
-    }
-
-    /* When active class is toggled, slide sidebar in */
-    #sidebar.active {
-        transform: translateX(0);
-        position: fixed !important;
-    }
-    </style>
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -49,11 +24,12 @@
 
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 fixed md:relative h-full z-50">
+            class="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white p-6 fixed inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 md:relative md:transform-none transition-transform duration-300 ease-in-out overflow-y-auto">
+
             <!-- Logo -->
             <div class="flex flex-col items-center mb-8">
                 <img src="images/jitihada.jpeg" alt="Jitihada Logo"
-                    class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg" />
+                    class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg">
                 <h2 class="mt-3 font-bold text-lg tracking-wide">JITIHADA GROUP</h2>
             </div>
 
@@ -83,12 +59,10 @@
 
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
-
                 <div class="flex items-center space-x-4">
                     <!-- Hamburger toggle button for mobile -->
-                    <button id="sidebarToggle" class="md:hidden p-2 text-white bg-blue-700 rounded hover:bg-blue-800">
-                        ☰
-                    </button>
+                    <button id="sidebarToggle"
+                        class="md:hidden p-2 text-white bg-blue-700 rounded hover:bg-blue-800">☰</button>
 
                     <div>
                         <h1 class="text-2xl md:text-3xl font-bold">Voting Dashboard</h1>
@@ -124,9 +98,8 @@
                 </div>
             </div>
 
-            <!-- Chart + Instructions -->
+            <!-- Charts + Instructions -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
                 <!-- Charts -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow lg:col-span-2 space-y-6">
                     <h2 class="font-semibold mb-3 text-gray-700 dark:text-gray-300">Live Voting Progress</h2>
@@ -159,7 +132,7 @@
                 </div>
             </div>
 
-            <!-- Recent Voters -->
+            <!-- Recent Votes -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow mb-6">
                 <h2 class="font-semibold mb-3 text-gray-700 dark:text-gray-300">Recent Votes</h2>
                 <div class="overflow-x-auto">
@@ -179,9 +152,10 @@
             <!-- Footer -->
             <footer class="text-center text-xs text-gray-500 dark:text-gray-400 mt-10">
                 © <?php echo date("Y"); ?> JITIHADA GROUP Voting System
-                <br />
+                <br>
                 Powered by <span class="font-semibold">Dantechdevs developers</span>
             </footer>
+
         </main>
     </div>
 
@@ -192,10 +166,29 @@
     </div>
 
     <script>
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full'); // Slide sidebar in/out
+        sidebarOverlay.classList.toggle('hidden'); // Show/hide overlay
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full'); // Slide out
+        sidebarOverlay.classList.add('hidden'); // Hide overlay
+    });
+
+    // Dark mode toggle
+    document.getElementById('darkToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+    });
+
     let chart, trendChart;
     let lastVoteCount = 0;
 
-    // Fetch Stats
     async function loadStats() {
         const res = await fetch("api/fetch_members.php");
         const data = await res.json();
@@ -206,7 +199,6 @@
         document.getElementById("turnout").innerText =
             data.total > 0 ? ((data.voted / data.total) * 100).toFixed(1) + "%" : "0%";
 
-        // Toast notification for new votes
         if (data.voted > lastVoteCount) {
             showToast(`${data.voted - lastVoteCount} new vote(s) recorded!`);
             lastVoteCount = data.voted;
@@ -229,11 +221,6 @@
                     plugins: {
                         legend: {
                             position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `${ctx.label}: ${ctx.raw} members`
-                            }
                         }
                     }
                 }
@@ -269,7 +256,6 @@
         }
     }
 
-    // Fetch Recent Votes
     async function loadRecentVotes() {
         const res = await fetch('api/fetch_recent_votes.php');
         const votes = await res.json();
@@ -285,7 +271,6 @@
         });
     }
 
-    // Toast function
     function showToast(msg) {
         const toast = document.getElementById('toast');
         toast.innerText = msg;
@@ -293,31 +278,10 @@
         setTimeout(() => toast.classList.add('hidden'), 3000);
     }
 
-    // Dark mode toggle
-    document.getElementById('darkToggle').addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-    });
-
-    // Sidebar toggle for mobile
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-    function toggleSidebar() {
-        sidebar.classList.toggle('active'); // Use active class for sliding
-        sidebarOverlay.classList.toggle('hidden');
-    }
-
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', toggleSidebar);
-
-    // Refresh data every 5s
     setInterval(() => {
         loadStats();
         loadRecentVotes();
     }, 5000);
-
-    // Initial load
     loadStats();
     loadRecentVotes();
     </script>
