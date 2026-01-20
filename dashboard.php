@@ -9,9 +9,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
+    tailwind.config = {
+        darkMode: 'class'
+    }
     </script>
 
     <!-- Chart.js -->
@@ -168,136 +168,138 @@
     </div>
 
     <script>
-        let chart, trendChart;
-        let lastVoteCount = 0;
+    let chart, trendChart;
+    let lastVoteCount = 0;
 
-        // Fetch Stats
-        async function loadStats() {
-            const res = await fetch("api/fetch_members.php");
-            const data = await res.json();
+    // Fetch Stats
+    async function loadStats() {
+        const res = await fetch("api/fetch_members.php");
+        const data = await res.json();
 
-            document.getElementById("total").innerText = data.total;
-            document.getElementById("voted").innerText = data.voted;
-            document.getElementById("pending").innerText = data.pending;
-            document.getElementById("turnout").innerText =
-                data.total > 0 ? ((data.voted / data.total) * 100).toFixed(1) + "%" : "0%";
+        document.getElementById("total").innerText = data.total;
+        document.getElementById("voted").innerText = data.voted;
+        document.getElementById("pending").innerText = data.pending;
+        document.getElementById("turnout").innerText =
+            data.total > 0 ? ((data.voted / data.total) * 100).toFixed(1) + "%" : "0%";
 
-            // Toast notification for new votes
-            if (data.voted > lastVoteCount) {
-                showToast(`${data.voted - lastVoteCount} new vote(s) recorded!`);
-                lastVoteCount = data.voted;
-            }
+        // Toast notification for new votes
+        if (data.voted > lastVoteCount) {
+            showToast(`${data.voted - lastVoteCount} new vote(s) recorded!`);
+            lastVoteCount = data.voted;
+        }
 
-            // Doughnut chart
-            if (!chart) {
-                chart = new Chart(document.getElementById('chart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Voted', 'Pending'],
-                        datasets: [{
-                            data: [data.voted, data.pending],
-                            backgroundColor: ['#22c55e', '#ef4444'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => `${ctx.label}: ${ctx.raw} members`
-                                }
+        // Doughnut chart
+        if (!chart) {
+            chart = new Chart(document.getElementById('chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Voted', 'Pending'],
+                    datasets: [{
+                        data: [data.voted, data.pending],
+                        backgroundColor: ['#22c55e', '#ef4444'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.raw} members`
                             }
                         }
                     }
-                });
-            } else {
-                chart.data.datasets[0].data = [data.voted, data.pending];
-                chart.update();
-            }
-
-            // Trend chart
-            if (!trendChart) {
-                trendChart = new Chart(document.getElementById('trendChart'), {
-                    type: 'line',
-                    data: {
-                        labels: data.dates || [],
-                        datasets: [{
-                            label: 'Votes Over Time',
-                            data: data.votes_over_time || [],
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59,130,246,0.2)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true
-                    }
-                });
-            } else {
-                trendChart.data.labels = data.dates || [];
-                trendChart.data.datasets[0].data = data.votes_over_time || [];
-                trendChart.update();
-            }
+                }
+            });
+        } else {
+            chart.data.datasets[0].data = [data.voted, data.pending];
+            chart.update();
         }
 
-        // Fetch Recent Votes
-        async function loadRecentVotes() {
-            const res = await fetch('api/fetch_recent_votes.php');
-            const votes = await res.json();
-            const tbody = document.getElementById('recent-votes');
-            tbody.innerHTML = '';
-            votes.forEach(v => {
-                tbody.innerHTML += `
+        // Trend chart
+        if (!trendChart) {
+            trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.dates || [],
+                    datasets: [{
+                        label: 'Votes Over Time',
+                        data: data.votes_over_time || [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        } else {
+            trendChart.data.labels = data.dates || [];
+            trendChart.data.datasets[0].data = data.votes_over_time || [];
+            trendChart.update();
+        }
+    }
+
+    // Fetch Recent Votes
+    async function loadRecentVotes() {
+        const res = await fetch('api/fetch_recent_votes.php');
+        const votes = await res.json();
+        const tbody = document.getElementById('recent-votes');
+        tbody.innerHTML = '';
+        votes.forEach(v => {
+            tbody.innerHTML += `
                     <tr class="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="px-4 py-2">${v.reg_no}</td>
                         <td class="px-4 py-2">${v.full_name}</td>
                         <td class="px-4 py-2">${v.voted_at}</td>
                     </tr>`;
-            });
-        }
-
-        // Toast function
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-
-        // Dark mode toggle
-        document.getElementById('darkToggle').addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
         });
+    }
 
-        // Sidebar toggle for mobile
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
+    // Toast function
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-        }
+    // Dark mode toggle
+    document.getElementById('darkToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+    });
 
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
+    // Sidebar toggle for mobile
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Refresh data every 5s
-        setInterval(() => {
-            loadStats();
-            loadRecentVotes();
-        }, 5000);
+    function toggleSidebar() {
+        sidebar.classList.toggle('hidden');
+        sidebarOverlay.classList.toggle('hidden');
+    }
 
-        // Initial load
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    // Refresh data every 5s
+    setInterval(() => {
         loadStats();
         loadRecentVotes();
+    }, 5000);
+
+    // Initial load
+    loadStats();
+    loadRecentVotes();
     </script>
 
 </body>
 
 </html>
+
+//updated
