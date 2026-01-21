@@ -11,13 +11,17 @@ $stmt = $pdo->query("SELECT COUNT(*) FROM members WHERE voted = 1");
 $usedSlots = (int)$stmt->fetchColumn();
 $remainingSlots = max(0, 10 - $usedSlots);
 $votingClosed = ($remainingSlots <= 0);
-
 /* =========================
    HANDLE VOTING
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
     $reg_no = strtoupper(trim($_POST['reg_no']));
 
+    // Initialize variables to avoid undefined warnings
+    $assigned_number = null;
+    $member = null;
+
+    // Fetch member
     $stmt = $pdo->prepare("SELECT id, name, voted, assigned_number FROM members WHERE reg_no = ?");
     $stmt->execute([$reg_no]);
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,16 +47,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
                 throw new Exception("No numbers left");
             }
 
+            // Assign a random available number
             $assigned_number = $available[array_rand($available)];
 
-            $stmt = $pdo->prepare("UPDATE members SET assigned_number = ?, voted = 1 WHERE id = ?");
+            // Update member vote and record timestamp
+            $stmt = $pdo->prepare("
+                UPDATE members 
+                SET assigned_number = ?, voted = 1, voted_at = NOW() 
+                WHERE id = ?
+            ");
             $stmt->execute([$assigned_number, $member['id']]);
 
             $pdo->commit();
 
             $message = "🎉 Vote successful! Your lucky number is: $assigned_number";
             $alertType = "success";
-
         } catch (Exception $e) {
             $pdo->rollBack();
             $message = "🚫 Voting Closed — All 10 slots are filled.";
@@ -76,11 +85,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @keyframes fade { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
-        .fade-in { animation: fade .5s ease-in-out; }
-        .marquee { overflow:hidden; white-space:nowrap; }
-        .marquee span { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
-        @keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-100%); } }
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fade .5s ease-in-out;
+        }
+
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 
@@ -90,8 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
     <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 md:hidden"></div>
 
     <!-- Hamburger Button -->
-    <button id="sidebarToggle"
-        class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
+    <button id="sidebarToggle" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-blue-700 text-white rounded-lg shadow">
         ☰
     </button>
 
@@ -150,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$votingClosed) {
 
                     <form method="POST" class="space-y-3">
                         <input type="text" name="reg_no" required placeholder="Enter REG.NO (e.g. JG0001)"
-                               class="form-control text-center">
+                            class="form-control text-center">
                         <button class="btn btn-success w-full">🗳 Vote</button>
                     </form>
                 <?php endif; ?>
